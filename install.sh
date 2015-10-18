@@ -40,7 +40,7 @@ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist
 echo "-> Waiting for mysql to start"
 until lsof -i:3306
 do
-    echo "."
+    echo -n "."
 done
 echo "-> Setting mysql root password"
 mysqladmin -u root password $MYSQL_ROOT_PASSWORD
