@@ -59,11 +59,17 @@ brew tap homebrew/php
 echo "-> Adding tap homebrew/dupes"
 brew tap homebrew/dupes
 echo "-> Installing php with fpm"
-install_pkg php56
+install_pkg homebrew/php/php56
 echo "-> Installing php mongodb"
 install_pkg homebrew/php/php56-mongo
 echo "-> Installing php xdebug"
 install_pkg homebrew/php/php56-xdebug
+echo "-> Installing composer"
+install_pkg homebrew/php/composer
+echo "-> Changing default fpm port to 8000"
+sed -i -e 's/127.0.0.1:9000/127.0.0.1:8000/' /usr/local/etc/php/5.6/php-fpm.conf
+echo "-> Changing php time to Asia/Kolkata"
+sed -i -e 's/^;date\.timezone\ =/date\.timezone\ =\ "Asia\/Kolkata"/' /usr/local/etc/php/5.6/php.ini
 echo "-> Setting php to run at boot"
 ln -sfv /usr/local/opt/php56/homebrew.mxcl.php56.plist ~/Library/LaunchAgents/
 echo "-> Launching php"
@@ -79,16 +85,18 @@ echo "server {
 
     listen 7000;
     server_name localhost;
-    root ~/Work;
+    root $HOME/Work;
 
     location ~ \.php($|/) {
         # try_files    \$uri = 404;
-        fastcgi_pass   127.0.0.1:9000;
+        fastcgi_pass   127.0.0.1:8000;
         fastcgi_index  index.php;
         fastcgi_param  SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         include        fastcgi_params;
     }
 }" > /usr/local/etc/nginx/servers/php-project.conf
+echo "-> Putting php-info in ~/Work"
+echo "<?php phpinfo(); ?>" > ~/Work/index.php
 echo "-> Setting nginx to run at boot"
 ln -sfv /usr/local/opt/nginx/*.plist ~/Library/LaunchAgents
 echo "-> Launching nginx"
