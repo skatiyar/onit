@@ -58,26 +58,35 @@ echo "-> Adding tap homebrew/php"
 brew tap homebrew/php
 echo "-> Adding tap homebrew/dupes"
 brew tap homebrew/dupes
-echo "-> Installing php with fpm"
 install_pkg homebrew/php/php56
-echo "-> Installing php mongodb"
 install_pkg homebrew/php/php56-mongo
-echo "-> Installing php xdebug"
 install_pkg homebrew/php/php56-xdebug
-echo "-> Installing composer"
 install_pkg homebrew/php/composer
+# configure php
 echo "-> Changing default fpm port to 8000"
 sed -i -e 's/127.0.0.1:9000/127.0.0.1:8000/' /usr/local/etc/php/5.6/php-fpm.conf
 echo "-> Changing php time to Asia/Kolkata"
 sed -i -e 's/^;date\.timezone\ =/date\.timezone\ =\ "Asia\/Kolkata"/' /usr/local/etc/php/5.6/php.ini
+if grep -q 'remote_enable=1' /usr/local/etc/php/5.6/conf.d/ext-xdebug.ini; then
+    echo "-> Remote enabled"
+else
+    echo "-> Enabling remote"
+    echo "xdebug.remote_enable=1" >> /usr/local/etc/php/5.6/conf.d/ext-xdebug.ini
+fi
+if grep -q 'remote_autostart=1' /usr/local/etc/php/5.6/conf.d/ext-xdebug.ini; then
+    echo "-> Remote autostart enabled"
+else
+    echo "-> Enabling autostart remote"
+    echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/5.6/conf.d/ext-xdebug.ini
+fi
 echo "-> Setting php to run at boot"
 ln -sfv /usr/local/opt/php56/homebrew.mxcl.php56.plist ~/Library/LaunchAgents/
 echo "-> Launching php"
 launchctl load ~/Library/LaunchAgents/homebrew.mxcl.php56.plist
 
 # install nginx
-echo "-> Installing nginx"
 install_pkg nginx
+# configure nginx
 echo "-> Creating new root dir for php-fpm at ~/Work"
 mkdir -p ~/Work
 echo "-> Adding php server to nginx"
